@@ -107,8 +107,9 @@ function speak(text){
 }
 function answer(text){
  const t=text.toLowerCase().trim();
-   preguntarAlServidor(text).then(respuesta => {
-    console.log("Respuesta del servidor:", respuesta);
+ preguntarAlServidor(text).then(respuesta => {
+  reply.textContent = respuesta;
+});
   });
  let r="Todavía estoy aprendiendo. Más adelante conectaremos una inteligencia artificial para responder preguntas más complejas.";
  if(/hola|buenos días|buenas tardes/.test(t))
