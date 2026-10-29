@@ -107,6 +107,9 @@ function speak(text){
 }
 function answer(text){
  const t=text.toLowerCase().trim();
+   preguntarAlServidor(text).then(respuesta => {
+    console.log("Respuesta del servidor:", respuesta);
+  });
  let r="Todavía estoy aprendiendo. Más adelante conectaremos una inteligencia artificial para responder preguntas más complejas.";
  if(/hola|buenos días|buenas tardes/.test(t))
   r="Hola. JARVIS está en línea. ¿En qué puedo ayudarte?";
@@ -124,6 +127,25 @@ function answer(text){
  statusEl.textContent="RESPUESTA PREPARADA";
  speak(r);
 }
+const JARVIS_SERVER = "https://holy-waterfall-652d.elizarrarazluis80.workers.dev";
+
+async function preguntarAlServidor(mensaje) {
+  try {
+    const respuesta = await fetch(JARVIS_SERVER, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ mensaje })
+    });
+
+    const datos = await respuesta.json();
+    return datos.respuesta || "No recibí una respuesta.";
+  } catch (error) {
+    return "No pude conectar con mi servidor. Inténtalo de nuevo.";
+  }
+ }
+ 
 document.getElementById("chat").addEventListener("submit",e=>{
  e.preventDefault();
  if(!input.value.trim())return;
