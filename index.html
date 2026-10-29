@@ -107,7 +107,7 @@ function speak(text){
 }
 function answer(text){
  const t=text.toLowerCase().trim();
- preguntarAlServidor(text).then(respuesta => {
+preguntarAlServidor(text).then(respuesta => {
   reply.textContent = respuesta;
 });
   });
