@@ -1,1 +1,155 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#02050b">
+<title>J.A.R.V.I.S.</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#02050b;color:#65dfff;
+ font-family:Arial,sans-serif;min-height:100vh;
+ display:flex;flex-direction:column;align-items:center;
+ justify-content:center;overflow-x:hidden;
+}
+header{position:absolute;top:20px;text-align:center;letter-spacing:5px}
+header h1{font-size:25px;text-shadow:0 0 15px #00aaff}
+header p{font-size:10px;letter-spacing:3px;color:#4b8fae}
+.core{
+ width:min(78vw,340px);aspect-ratio:1;position:relative;
+ display:flex;align-items:center;justify-content:center;
+ margin:20px auto;
+}
+.ring{
+ position:absolute;width:90%;height:90%;border-radius:50%;
+ border:2px solid #00bfff;
+ box-shadow:0 0 12px #008cff,inset 0 0 15px #007bff;
+ animation:spin 8s linear infinite;
+}
+.ring:nth-child(2){width:76%;height:96%;border-color:#72e8ff;
+ animation:spin 5s linear infinite reverse;transform:rotate(40deg)}
+.ring:nth-child(3){width:96%;height:65%;border-color:#087bff;
+ animation:spin 6s linear infinite}
+.ring:nth-child(4){width:60%;height:60%;border-style:dashed;
+ animation:spin 12s linear infinite reverse}
+.orb{
+ width:32%;height:32%;border-radius:50%;
+ background:radial-gradient(circle,#fff 0%,#91f4ff 12%,#00aaff 35%,#004cff 65%,transparent 75%);
+ box-shadow:0 0 25px #00cfff,0 0 70px #006aff;
+ animation:pulse 2s ease-in-out infinite;
+}
+@keyframes spin{to{rotate:360deg}}
+@keyframes pulse{50%{transform:scale(1.18);opacity:.7}}
+#status{font-size:12px;letter-spacing:3px;margin:8px}
+#reply{color:#b8eaff;text-align:center;padding:0 24px;
+ min-height:38px;font-size:14px;max-width:500px}
+.controls{display:flex;gap:12px;margin:18px}
+button{
+ color:#75e7ff;background:#061827;border:1px solid #078ed0;
+ border-radius:30px;padding:14px 20px;font-size:15px;
+ box-shadow:0 0 12px #003e70;cursor:pointer
+}
+button:active{background:#075078}
+form{display:flex;width:90%;max-width:450px;gap:8px}
+input{
+ min-width:0;flex:1;background:#07111d;border:1px solid #087bb8;
+ border-radius:24px;padding:13px;color:white;font-size:14px
+}
+footer{position:fixed;bottom:12px;font-size:9px;
+ letter-spacing:2px;color:#28627f}
+</style>
+</head>
+<body>
+<header>
+<h1>J.A.R.V.I.S.</h1>
+<p>ASISTENTE PERSONAL</p>
+</header>
+
+<main style="width:100%;display:flex;flex-direction:column;align-items:center">
+<div class="core" aria-label="Núcleo de energía azul">
+<div class="ring"></div>
+<div class="ring"></div>
+<div class="ring"></div>
+<div class="ring"></div>
+<div class="orb"></div>
+</div>
+
+<div id="status">SISTEMA EN ESPERA</div>
+<div id="reply">Hola. Soy JARVIS. Estoy listo para ti.</div>
+
+<div class="controls">
+<button id="mic">🎙 Hablar</button>
+<button id="sound">🔊 Voz activada</button>
+</div>
+
+<form id="chat">
+<input id="message" placeholder="Escribe a JARVIS..." autocomplete="off">
+<button type="submit">Enviar</button>
+</form>
+</main>
+
+<footer>JARVIS SYSTEM • PROTOTIPO 01</footer>
+
+<script>
+const statusEl=document.getElementById("status");
+const reply=document.getElementById("reply");
+const input=document.getElementById("message");
+let voiceOn=true;
+
+function speak(text){
+ if(!voiceOn || !("speechSynthesis" in window)) return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="es-MX";u.rate=1;
+ speechSynthesis.speak(u);
+}
+function answer(text){
+ const t=text.toLowerCase().trim();
+ let r="Todavía estoy aprendiendo. Más adelante conectaremos una inteligencia artificial para responder preguntas más complejas.";
+ if(/hola|buenos días|buenas tardes/.test(t))
+  r="Hola. JARVIS está en línea. ¿En qué puedo ayudarte?";
+ else if(/cómo te llamas|quién eres/.test(t))
+  r="Soy JARVIS, tu asistente personal en desarrollo.";
+ else if(/hora/.test(t))
+  r="La hora de tu teléfono es "+new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})+".";
+ else if(/fecha|día es hoy/.test(t))
+  r="Hoy es "+new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})+".";
+ else if(/gracias/.test(t))
+  r="De nada. Estoy aquí para ayudarte.";
+ else if(/adiós|hasta luego/.test(t))
+  r="Hasta luego. JARVIS queda en espera.";
+ reply.textContent=r;
+ statusEl.textContent="RESPUESTA PREPARADA";
+ speak(r);
+}
+document.getElementById("chat").addEventListener("submit",e=>{
+ e.preventDefault();
+ if(!input.value.trim())return;
+ answer(input.value);
+ input.value="";
+});
+document.getElementById("sound").addEventListener("click",()=>{
+ voiceOn=!voiceOn;
+ document.getElementById("sound").textContent=voiceOn?"🔊 Voz activada":"🔇 Voz desactivada";
+ if(!voiceOn && "speechSynthesis" in window)speechSynthesis.cancel();
+});
+document.getElementById("mic").addEventListener("click",()=>{
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){
+  reply.textContent="Tu navegador no permite reconocimiento de voz aquí. Prueba con Chrome actualizado.";
+  return;
+ }
+ const rec=new SR();
+ rec.lang="es-MX";
+ rec.onstart=()=>statusEl.textContent="TE ESTOY ESCUCHANDO...";
+ rec.onresult=e=>answer(e.results[0][0].transcript);
+ rec.onerror=()=>{statusEl.textContent="NO SE PUDO ESCUCHAR";reply.textContent="Revisa el permiso del micrófono e inténtalo otra vez.";};
+ rec.onend=()=>{if(statusEl.textContent==="TE ESTOY ESCUCHANDO...")statusEl.textContent="SISTEMA EN ESPERA";};
+ rec.start();
+});
+</script>
+</body>
+</html>
+
